@@ -1,0 +1,13 @@
+.reveal section img {
+    max-height:250px;
+}
+
+.reveal section video {
+    max-width:450px;
+}
+
+.imgright img{
+    
+        float: right;
+    
+}
