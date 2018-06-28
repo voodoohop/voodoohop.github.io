@@ -24,53 +24,218 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-					<section>
-							Deep Neural Networks for visuals of <i>Die Wilde Jagd</i>
+					<section> 
+							About me
+										
+							<section data-markdown data-separator="---">
+									<script type="text/template">
+										### Background
+										* 2001: Artificial Intelligence & Computer Science at the University of Edinburgh
+										* Sun Microsystems (Java Engineer)
+										* Amazon.com
+										* Brazil (Voodoohop)
+										<br/> <br/>  
+		
+										### Artificial Intelligence
+										- Main Interest: Biologically Inspired Systems  
+										- Specifically *Artifical Neural Networks* and *Evolutionary Algorithms*  
+										- *ANNs* were starting to gain popularity again (beginning of 2000s)  
+										
+										---
+										### Thesis: Evolving Neural Models of Insect Path Integration
+										![](images/desertantnavigation.jpg) ![](images/robot.png )  
+										* Homing behaviour of the desert ant
+										* Simulated ants controlled by *ANNs* which are evolved using *Genetic Algorithms*
+										* Ran neural network on robot and compared behaviour to real insect
+										---
+										### VOODOOHOP (2010-onward)
+										![](images/voodoohop.jpg) ![](images/voodoohop_2.jpg)
+										---
+										### Sound painting installation
+										<video width="40%" src="videos/soundpainting_conception_demo1.m4v" controls></video>
+										<video width="40%" src="videos/soundpainting.mp4" controls onloadstart="this.volume=0" ></video>
+										---
+										### Head tracking
+										- use kinect sensor?
+										<video width="40%" src="videos/framediffing.mp4" style="float:right" controls></video>		
+										- problem with brightness next to sea
+										- webcam frame diffing
+										- would consider convolutional neural networks now
+										<img src="images/dnn_head_tracking.png" />
+										---
+										### Small applications of AI
+										- Voodoohop artwork upsampling using deep neural network trained on anime.  
+										<img src="images/artwork_waifu.png" style="max-width:700px;"/>
+										- Scaling in Photoshop  
+										<img src="images/voodohop_entropia_orig.jpg" style="max-width:700px;" />
+										--- 
+										### Music Mastering
+										- Montreal based LANDR surprisingly good
+										<img src="images/comparemasters.png" style="max-width:800px" />
+										- blind test 4 human masters + 1 machine based: machine 2nd place
+									</script>
+							</section>
+		
+						</section>
+
+				<section>
+	
 
 
 					<section data-markdown data-separator="---">
 							<script type="text/template">
-								<video id="video_wahwah_cropped" src="videos/wahwahcropped-fix.mov" controls loop onplay='document.getElementById("video_mutek_stylized").play()' ></video>
-								<video id="video_mutek_stylized" src="videos/wahwahcropped-stylized-mutek_ia.mov" controls loop ></video>
+								Deep Neural Networks for visuals of <i>Die Wilde Jagd</i>
+								<video class="widervideo" src="videos/wahwah_original.mp4" controls ></video>
+								- Idea:
+									- Visualize audio waveforms and spectrograms
+									- Transform visualization frame by frame using Deep Neural Networks
+								- Approach #1: Neural Style Transfer
+								- Approach #2: Pix2pix
+								---
+								### Beautiful failures
+								- neural networks compelling for art
+								<video style="float:right; margin:10px;" class="halfvideo" src="videos/startrek_nn.mp4" controls ></video>
+								- failure cases especially interesting
+								- symbol-based / procedural failure vs neural network failure
+								- Deep voice imitation (lyrebird) *Hi Joan this is my birthday and I just turned 36*
+								<audio src="videos/lirebird_birthday.mp3" controls />
+								
+								---
+								### Audio to Video
+								<video src="videos/meister_histogram.mp4" controls height="25%" style="max-height:300px"></video>
+								<video src="videos/meister_cqt.mp4" controls height="25%" style="max-height:300px"></video>
+								<video src="videos/flederboy_vectorscope.mp4" controls height="25%" style="max-height:300px"> </video>
 
+								How do we make these look more uniqe?
+								---
+								### Approach #1: Neural Style Transfer
+								<img src="images/styletransfer1.png" style="width:800px; max-width: 800px"/>
+								---
+								![](images/convnet.png)
+								- Maps in the lower layers look for low level features such as lines or blobs
+								- As we go to the higher layers, features become increasingly complex
+								- Intuiton:
+									- similar activation in the lower layers -> similar style
+									- similar activation in the higher layers -> similar content
+								- Content of the final image should be similar to content of the content image
+								- Style of the final image should be similar to style of the style image
+								---
+								<video class="medium_height"  id="video_wahwah_cropped" width="50%" src="videos/wahwahcropped-fix.mov" controls loop onplay='document.getElementById("video_mutek_stylized").play()' ></video>
+								+ <img src="images/mutek_ia.jpg" width="30%"/>  
+								= <video class="medium_height" id="video_mutek_stylized" src="videos/wahwahcropped-stylized-mutek_ia.mov" controls loop ></video>
+								---
+								### Applying to audio visualizations
+								<video style="max-width:450px" src="videos/ginsterblut_styled.mp4" controls></video>
+								<video style="max-width:450px"src="videos/kreuzgang_styled.mp4" controls></video>
+								---								
+								### Approach #2: Pix2pix
+								<div class="figure_multi">
+									<div class="figure_inner" style="display: inline-block">
+										<figure>
+											<img src="/images/mountains_data_input.jpg">
+											<figcaption>Color image</figcaption>
+										</figure>
+									</div>
+									<div class="figure_inner" style="display: inline-block">
+										<figure>
+											<img src="/images/mountains_data_output.jpg">
+											<figcaption>Corresponding black &amp; white image</figcaption>
+										</figure>
+									</div>
+								</div>
+								- clever application of gennerative adversarial networks (GANs)
+								- two competing neural networks (generator and disciminator) trained at the same time compete with each other
+								---
+								<img src="images/algorithm_pix2pix.png" style="width:800px;max-width:750px"/>
+								---
+								<div class="figure_multi">
+									<div class="figure_inner" style="display: inline-block">
+										<figure>
+											<img src="/images/mountains_input.jpg">
+											<figcaption>input</figcaption>
+										</figure>
+									</div>
+									<div class="figure_inner" style="display: inline-block">
+										<figure>
+											<img src="/images/mountains_target.jpg">
+											<figcaption>target (original)</figcaption>
+										</figure>
+									</div>
+									<div class="figure_inner" style="display: inline-block">
+										<figure>
+											<img src="/images/mountains_output.jpg">
+											<figcaption>output from colorizing</figcaption>
+										</figure>
+									</div>
+									
+								</div>
+								---
+								<video src="videos/gloomy_sunday.mp4" controls onloadstart="this.volume=0" ></video>
+								training data: paintings, illustrations, sketches and photographs covering landscapes, portraits, religious imagery, pastoral scenes
+								---
+								### Training
+								<video class="widervideo" src="videos/trainingdata.mp4" controls ></video>
 
-								style:  
-								<img src="images/mutek_ia.jpg" />  
-							---
-							### todo
+								<img src="images/5000_train_res.png" style="max-width:350px">
+								<img src="images/45000_train_res.png" style="max-width:350px">
+								---
+								### Audio Visualization through Pix2pix
+								- trained pix2pix to reconstruct original video from blurry desatured frames
+								- audio visualization -> desaturate + blur -> reconstruct
+								<br><br>>
+								<video src="videos/wawavisualization_with_audio.mp4" controls ></video>
+								---
+								### Audio Visualization 2 through pix2pix
+								<video src="videos/wawavideotransformed_canny.mp4" controls ></video>
+								<video src="videos/wawa_histogram_canny_audio.mp4" controls ></video>
+								---
+								### Audio Visualization 3 through pix2pix
+								<video src="videos/der_meister_low.mov" controls ></video>
+								<video src="videos/wildejagd_live.mp4" controls style="margin-left:10px" ></video>
+								---
+								### Lessons learned
+								- initial plan: realtime rendering from live audio input
+								    - latency
+								    - computation time  
+								- quite simple to run cutting edge research at home due to open source culture of the deep learning community
+								- be good at using the command line / terminal
+								- programming skills not necessary
+								- forget about training deep neural networks at home
+								- train on a cloud based service and evaluate at home  
+								![](images/floydhub.png) ![](images/spell.svg)
 
-							singing on the wall (artrio)
-							![](images/voodoohop_ableton_tools.png)
-							upsampling with waifu2x
-
-							![](images/comparemasters.png)
-							---
-							<video src="videos/wahwah_original.mp4" controls />
-							---
-							psychedelics? feedback?
-
-							#### neural style transfer 
-
-							#### pix2pix
-							---
-							![](images/5000_train_res.png) ![](images/10000_train_res.png) 
-							---
-							### practical considerations
-
-							#### initial plan: realtime rendering from live audio input
-							* latency
-							* computation time  
-
-							#### final: pre-rendering based on backing tracks
-							* cloud-based
 						</script>
 					</section>
+<!-- 
+					### todo
+
+					singing on the wall (artrio)
+					![](images/voodoohop_ableton_tools.png)
+					upsampling with waifu2x
+
+					![](images/comparemasters.png)
+					---
+
+					psychedelics? feedback?
+
+					#### neural style transfer 
+
+					#### pix2pix
+					---
+					
+					---
+					### practical considerations
+
+					#### 
+
+					#### final: pre-rendering based on backing tracks
+					* cloud-based -->
 				</section>
 					<section>Music
 					
 							<section data-markdown data-separator="---">
 									<script type="text/template">
-										### "Organic" Music	(need to change title)
+										### Humanizing Electronic Music
 										* Producing or performin elecgronic musics usually involves looping grid based patterns
 										* Our brains are primed to interpret complex sensory stimuli 
 										* Stimuli are not independent. Result of complex interactions between physical objects
@@ -97,9 +262,20 @@
 
 										Every time the software plays the piece of music it is slightly different
 
-										Balance between predictability and surprise
+										Balance between predictability and surprise.
 
+										---
+										### Demo Terry Riley - In C
+										<img src="images/terry riley in c.png" style="max-width:90%" />
+										---
+										### Demo: James Holden's Humanizer + Own Max for Live Harmonization plugins
+										- harmonic mixing became popular amongst DJs in the last few years
+										- traveling around the circle of fifths
 										
+										<video src="videos/harmonic_mixing_tools.mp4" controls style="max-width:700px"></video>
+										---
+										### Demo: James Holden's Humanizer + Own Max for Live Harmonization plugins
+										<img src="images/live_set_with_hummanizer_and_mixing_tools.svg" style="max-width:100%"/>
 										---
 										- Similar to the fractal nature, self-similarity in music occurs on different scales
 										- Arrangement (chord/verse)
@@ -114,40 +290,7 @@
 									</script>
 							</section>						
 					</section>
-				<section> 
-					About me
-								
-					<section data-markdown data-separator="---">
-							<script type="text/template">
 				
-								### Artificial Intelligence
-								Main Interest: Biologically Inspired Systems  
-								*Artifical Neural Networks* and *Evolutionary Algorithms*  
-								*ANNs* were starting to gain popularity again (beginning of 2000s)
-								#### Thesis: Evolving Neural Models of Insect Path Integration  
-								![](images/desertantnavigation.jpg)
-								![](images/robot.png )  
-								* Homing behaviour of the desert ant 
-								* Simulated ants controlled by *ANNs* which are evolved using *Genetic Algorithms*
-								* Ran neural network on robot and compared behaviour to real insect
-								
-								---
-
-								bla
-							</script>
-					</section>
-
-					<section data-markdown>
-						<script type="text/template">
-							## Background #1
-							* Artificial Intelligence & Computer Science at the University of Edinburgh
-							
-						</script>
-					</section>
-
-
-				</section>
-
 			</div>
 		</div>
 
@@ -158,20 +301,24 @@
 			// More info about config & dependencies:
 			// - https://github.com/hakimel/reveal.js#configuration
 			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
+		Reveal.initialize({
 				multiplex: {
 		// Example values. To generate your own, see the socket.io server instructions.
-		secret: null, // null so the clients do not have control of the master presentation
+		secret: "15290987759458705343", // null so the clients do not have control of the master presentation
 		id: 'd2368abdaebbea66', // id, obtained from socket.io server
-		url: 'https://cors.io/?u=https://reveal-js-multiplex-ccjbegmaii.now.sh' // Location of your socket.io server
+		url: 'https://reveal-js-multiplex-ccjbegmaii.now.sh' // Location of your socket.io server
+
+		// client: url: 'https://cors.io/?u=https://reveal-js-multiplex-ccjbegmaii.now.sh' 
 	},
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
 					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-					{ src: '//cdn.socket.io/socket.io-1.3.5.js' },
-					{ src: 'plugin/multiplex/client.js' }
+					{ src: '//cdn.socket.io/socket.io-1.3.5.js', async: true },
+					{ src: 'plugin/multiplex/master.js', async: true },
+
+					// client; { src: 'plugin/multiplex/client.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
 				]
 			});
 		</script>

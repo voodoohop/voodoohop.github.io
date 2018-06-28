@@ -1,13 +1,25 @@
 .reveal section img {
-    max-height:250px;
+    max-width:500px;
 }
 
-.reveal section video {
-    max-width:450px;
-}
+/* .reveal section video {
+    /* max-width:450px; */
+} */
 
 .imgright img{
     
         float: right;
     
+}
+
+.widervideo {
+    max-width: 600px !important;
+}
+
+.halfvideo {
+    max-width: 400px !important;
+}
+
+.medium_height {
+    max-height: 300px !important;
 }
