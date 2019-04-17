@@ -3,14 +3,14 @@
   "name": "Voodoohop Live Tools",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "favicon.png",
       "sizes": "192x192",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "faviconbig.ico",
+      "src": "faviconbig.png",
       "sizes": "512x512",
-      "type": "image/x-icon"
+      "type": "image/png"
     }
   ],
   "start_url": ".",
