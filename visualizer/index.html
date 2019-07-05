@@ -223,9 +223,13 @@
 
 const urlParams = new URLSearchParams(window.location.search);
 const password = urlParams.get('pass');
-if (password != "albi")
-		document.getElementById("container").style.display ="none";
+if (password != "albi") {
+	var container = document.getElementById("container");
+		container.style.display ="none";
+	
+	container.parentNode.removeChild(container);
 
+}
 
 		const websocket = typeof WebSocket !== "undefined" ? new WebSocket("ws://localhost:3031/") : null;
 		let activeTracksInMaestron=[];
