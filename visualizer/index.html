@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>UMAP VS TSNE</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			color: #ffffff !important;
+			background-color: #ffffff;
+			margin: 0px;
+			overflow: hidden;
+			
+		}
+
+		#info {
+			position: absolute;
+			top: 0px;
+			width: 100%;
+			padding: 5px;
+			font-family: Monospace;
+			font-size: 13px;
+			text-align: center;
+			font-weight: bold;
+		}
+
+		a {
+			color: #fff;
+		}
+	</style>
+
+	<!-- List items with avatar and action -->
+	<style>
+		.demo-list-control {
+			width: 230px;
+		}
+
+		.demo-list-radio {
+			display: inline;
+		}
+
+	</style>
+</head>
+
+
+
+
+<body>
+	<link rel="stylesheet" href="lib/materialicons.css">
+	<link rel="stylesheet" href="lib/material.blue_grey-deep_orange.min.css" />
+	<link rel="stylesheet" href="lib/mdl-ext.min.css" />
+	<script src="lib/material.min.js"></script>
+
+	<script src="lib/three.min.js"></script>
+	<script src="lib/OrbitControls.js"></script>
+	<script src="lib/d3.v4.min.js"></script>
+	<script src="lib/stats.min.js"></script>
+
+	<style>
+		li {
+			color: white !important;
+		}
+	</style>
+
+	
+	<script type="x-shader/x-vertex" id="vertexshader">
+			attribute float size;
+			attribute vec3 ca;
+			varying vec3 vColor;
+			void main() {
+				vColor = ca;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_PointSize = size * ( 300.0 / -mvPosition.z );
+				gl_Position = projectionMatrix * mvPosition;
+			}
+		</script>
+
+	<script type="x-shader/x-fragment" id="fragmentshader">
+			uniform vec3 color;
+			uniform sampler2D pointTexture;
+			varying vec3 vColor;
+			void main() {
+				vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );
+				gl_FragColor = color;
+			}
+		</script>
+
+
+
+	<!-- The drawer is always open in large screens. The header is always shown,
+		  even in small screens. -->
+	<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer
+            		mdl-layout--fixed-header">
+		<header class="mdl-layout__header">
+			<div id='header' class="mdl-layout__header-row">
+				<div class="mdl-layout-spacer"></div>
+				<nav class="mdl-navigation">
+					<h6 id="filename"></h6>
+				</nav>
+				<div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                                mdl-textfield--floating-label mdl-textfield--align-right">
+
+					<div class="mdl-textfield__expandable-holder">
+						<input class="mdl-textfield__input" type="text" name="sample" id="fixed-header-drawer-exp">
+					</div>
+				</div>
+			</div>
+		</header>
+		<div class="mdl-layout__drawer mdlext-dark-color-theme" id='drawer'>
+			<span class="mdl-layout-title mdlext-dark-color-theme"><img src="pixtunes_logo_white.svg" width="170" /></span>
+			<nav class="mdl-navigation mdlext-dark-color-theme">
+
+				<ul class="demo-list-control mdl-list mdlext-dark-color-theme">
+					<li class="mdl-list__item">
+						<span class="mdl-list__item-primary-content">
+							MFCC
+						</span>
+						<span class="mdl-list__item-secondary-action">
+							<label class="demo-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect"
+								for="feature-list-option-1">
+								<input type="radio" id="feature-list-option-1" class="mdl-radio__button" name="options"
+									value="mfcc" oninput="updateGraph()" onchange="updateGraph()" checked />
+							</label>
+						</span>
+					</li>
+
+					<li class="mdl-list__item">
+						<span class="mdl-list__item-primary-content">
+							Wavenet
+						</span>
+						<span class="mdl-list__item-secondary-action">
+							<label class="demo-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect"
+								for="feature-list-option-2">
+								<input type="radio" id="feature-list-option-2" class="mdl-radio__button" name="options"
+									value="wavenet" oninput="updateGraph()" onchange="updateGraph()" />
+							</label>
+						</span>
+					</li>
+				</ul>
+			</nav>
+
+			<hr>
+
+			<nav class="mdl-navigation mdlext-dark-color-theme">
+				<ul class="demo-list-control mdl-list">
+					<li class="mdl-list__item">
+						<span class="mdl-list__item-primary-content">
+							UMAP
+						</span>
+						<span class="mdl-list__item-secondary-action">
+							<label class="demo-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect"
+								for="method-list-option-1">
+								<input type="radio" id="method-list-option-1" class="mdl-radio__button"
+									name="methodoptions" value="umap" oninput="updateGraph()"
+									onchange="updateGraph()" checked />
+							</label>
+						</span>
+					</li>
+
+					<li class="mdl-list__item">
+						<span class="mdl-list__item-primary-content">
+							t-SNE
+						</span>
+						<span class="mdl-list__item-secondary-action">
+							<label class="demo-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect"
+								for="method-list-option-2">
+								<input type="radio" id="method-list-option-2" class="mdl-radio__button"
+									name="methodoptions" value="tsne" oninput="updateGraph()" onchange="updateGraph()"
+									 />
+							</label>
+						</span>
+					</li>
+
+
+					<li class="mdl-list__item">
+						<span class="mdl-list__item-primary-content">
+							PCA
+						</span>
+						<span class="mdl-list__item-secondary-action">
+							<label class="demo-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect"
+								for="method-list-option-3">
+								<input type="radio" id="method-list-option-3" class="mdl-radio__button"
+									name="methodoptions" value="pca" oninput="updateGraph()" onchange="updateGraph()" />
+							</label>
+						</span>
+					</li>
+				</ul>
+
+				<div id="sliders">
+					<p style="width:230px">
+						<div class="mdl-card__supporting-text">
+							<p id="slider-text-1">Neighbours</p>
+						</div>
+						<input class="mdl-slider mdl-js-slider" type="range" id="slider1" min="1" max="5" step="1"
+							oninput="updateGraph()" onchange="updateGraph()">
+						<div class="mdl-card__supporting-text">
+							<p id="slider-text-2">Distances</p>
+						</div>
+						<input class="mdl-slider mdl-js-slider" type="range" id="slider2" min="1" max="5" step="1"
+							oninput="updateGraph()" onchange="updateGraph()">
+					</p>
+				</div>
+
+				<canvas id="analyserCanvas" width="300" height="200" style="display:none" />
+			</nav>
+		</div>
+		<main class="mdl-layout__content mdlext-dark-color-theme">
+			<div class="page-content mdlext-dark-color-theme">
+				<!-- Your content goes here -->
+
+				<div id="container" class="mdlext-dark-color-theme"></div>
+			</div>
+		</main>
+	</div>
+
+	<script type="text/javascript" src="data.json"></script>
+	<script src='webaudiox.js'></script>
+	<script type="text/javascript" src="lib/mdl-ext.min.js" charset="utf-8"></script>
+
+	<script>
+
+
+const urlParams = new URLSearchParams(window.location.search);
+const password = urlParams.get('pw');
+if (password != "albi")
+		document.getElementById("container").style.display ="none";
+
+
+		const websocket = typeof WebSocket !== "undefined" ? new WebSocket("ws://localhost:3031/") : null;
+		let activeTracksInMaestron=[];
+
+		function websocketTrackInfoHandler({data}) {
+        const [message, [trackno, library_path]] = JSON.parse(data);
+        if (message === "track") {
+		  	console.log("updating track info",trackno,library_path);
+			activeTracksInMaestron[trackno] = (library_path  && library_path.replace("/MAIN/","")) || null;
+        }
+      }
+		websocket.addEventListener("message", websocketTrackInfoHandler);
+
+		// const colors = {
+		// 	bass_accent: new THREE.Color(0xFF0000),
+		// 	bass_legato: new THREE.Color(0xF00090),
+		// 	drums: new THREE.Color(0xFFFF00),
+		// 	// melody: new THREE.Color(0x0000FF),
+		// 	harmony_legato: new THREE.Color(0x0000FF),
+		// 	harmony_accent: new THREE.Color(0xF000F0),
+		// 	// air: new THREE.Color(0xFF00FF),
+		// 	pulse: new THREE.Color(0x009090),
+		// 	default: new THREE.Color(0xFFFFFF)
+		// }
+		const colors = {
+			bass: new THREE.Color(0xFF0000),
+			// bass_legato: new THREE.Color(0xF00090),
+			drums: new THREE.Color(0xFFFF00),
+			percuss: new THREE.Color(0x99FF99),
+			melodic: new THREE.Color(0x0000FF),
+			vocal: new THREE.Color(0xF000F0),
+			fx: new THREE.Color(0xFF00FF),
+			pulse: new THREE.Color(0x009090),
+			default: new THREE.Color(0xFFFFFF)
+		}
+
+		const filenameToColor = (filename) => {
+			// const layerName = filename.split("-")[1];
+			// if (!layerName)
+			// 	return colors.default;
+			const layerName = filename;
+			const color = Object.keys(colors).reduce((selectedColor, colorLayer) => {
+				if (layerName.toLowerCase().indexOf(colorLayer) >= 0)
+					return colors[colorLayer];
+				return selectedColor;
+			}, colors.default);
+			return color;
+		}
+		// create WebAudio API context
+		var context = new AudioContext()
+
+		// Create lineOut
+		var lineOut = new WebAudiox.LineOut(context)
+		var lineOutAnalyser = new WebAudiox.LineOut(context)
+		lineOut.volume = 0.4;
+		var analyser = context.createAnalyser()
+		analyser.connect(lineOutAnalyser.destination);
+		lineOutAnalyser.destination = analyser;
+		var canvas = document.getElementById("analyserCanvas");
+	
+		var data = JSON.parse(d);
+
+		function getData(method, feature, a, b) {
+			var key;
+			if (method.toString() == "pca") {
+				key = method.toString() + feature.toString();
+			} else if (method.toString() == "tsne") {
+				key = method.toString() + feature.toString() + b.toString() + a.toString();
+			} else {
+				key = method.toString() + feature.toString() + a.toString() + b.toString();
+			}
+			return data[key];
+		}
+
+		var filePaths = data['filenames'];
+
+
+		var renderer, scene, camera, stats;
+		var pointclouds;
+		var raycaster;
+		var mouse = new THREE.Vector2();
+		var clock;
+		var mouseHasMoved = false;
+		var sound = null;
+		var interpolating = false;
+		var interpolatingAmount = 0;
+		var interpolationSpeed = 0.01;
+		var target = null;
+		var previousSampleIndex = -1;
+		var threshold = 0.1;
+		var pointSize = 4;
+		var width = 150;
+		var length = 150;
+
+		var drawerWidth = document.getElementById("drawer").clientWidth;
+		var titleHeight = document.getElementById("header").clientHeight;
+		var renderWidth = window.innerWidth - drawerWidth;
+		var renderHeight = window.innerHeight - titleHeight;
+		var playingSources = [];
+
+		var pointCloud=null;
+		init();
+		animate();
+
+		function sortPoints() {
+				var vector = new THREE.Vector3();
+				// Model View Projection matrix
+				var matrix = new THREE.Matrix4();
+				matrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+				matrix.multiply( pointCloud.matrixWorld );
+				//
+				var geometry = pointCloud.geometry;
+				var index = geometry.getIndex();
+				var positions = geometry.getAttribute( 'position' ).array;
+				var length = positions.length / 3;
+				if ( index === null ) {
+					var array = new Uint16Array( length );
+					for ( var i = 0; i < length; i ++ ) {
+						array[ i ] = i;
+					}
+					index = new THREE.BufferAttribute( array, 1 );
+					geometry.setIndex( index );
+				}
+				var sortArray = [];
+				for ( var i = 0; i < length; i ++ ) {
+					vector.fromArray( positions, i * 3 );
+					vector.applyMatrix4( matrix );
+					sortArray.push( [ vector.z, i ] );
+				}
+				function numericalSort( a, b ) {
+					return b[ 0 ] - a[ 0 ];
+				}
+				sortArray.sort( numericalSort );
+				var indices = index.array;
+				for ( var i = 0; i < length; i ++ ) {
+					indices[ i ] = sortArray[ i ][ 1 ];
+				}
+				geometry.index.needsUpdate = true;
+			}
+
+
+		function updateGraph() {
+			var slider1 = parseInt(document.getElementById("slider1").value) - 1;
+			var slider2 = parseInt(document.getElementById("slider2").value) - 1;
+
+			var method = null;
+			var methodOptions = document.getElementsByClassName('mdl-radio__button');
+			for (var i = 0; methodOptions[i]; ++i) {
+				let id = methodOptions[i].id.toString();
+				if (methodOptions[i].checked && (id.indexOf("method") != -1)) {
+					method = methodOptions[i].value;
+					console.log("method.", method);
+					break;
+				}
+			}
+
+			var feature = null;
+			var featureOptions = document.getElementsByClassName('mdl-radio__button');
+			for (var i = 0; featureOptions[i]; ++i) {
+				let id = featureOptions[i].id.toString();
+				if (featureOptions[i].checked && (id.indexOf("feature") != -1)) {
+					feature = featureOptions[i].value;
+					break;
+				}
+			}
+
+			if (method == "umap") {
+				document.getElementById("sliders").style.visibility = "visible";
+				document.getElementById("slider-text-1").innerHTML = "Neighbours";
+				document.getElementById("slider-text-2").innerHTML = "Distances";
+			} else if (method == "tsne") {
+				document.getElementById("sliders").style.visibility = "visible";
+				document.getElementById("slider-text-1").innerHTML = "Perplexity";
+				document.getElementById("slider-text-2").innerHTML = "Iterations";
+			} else if (method == "pca") {
+				document.getElementById("sliders").style.visibility = "hidden";
+			}
+
+			let targetData = getData(method, feature, slider1, slider2);
+			target = generatePositionsFromData(targetData);
+			interpolating = true;
+			interpolatingAmount = 0;
+		}
+
+		function generatePositionsFromData(data) {
+
+			var positions = new Float32Array(data.length * 3);
+			for (var i = 0; i < data.length; ++i) {
+
+				let x = data[i]['coordinates'][0] - 0.5;
+				let y = data[i]['coordinates'][1] - 0.5;
+
+				let z = data[i]['coordinates'].length > 2 ? data[i]['coordinates'][2] - 0.5 : 0;
+				// console.log({ x, y, z });
+				positions[3 * i] = x;
+				positions[3 * i + 1] = y;
+				positions[3 * i + 2] = z;
+			}
+
+			return positions;
+		}
+
+
+
+		function generatePointCloudGeometry(data, filenames) {
+
+			var geometry = new THREE.BufferGeometry();
+			var positions = generatePositionsFromData(data);
+
+			var colors = new Float32Array(data.length * 3);
+
+			var sizes = new Float32Array(data.length);
+
+			for (var i = 0; i < data.length; ++i) {
+				var color = filenameToColor(filenames[i]);
+				// color.setH;
+				colors[3 * i] = color.r;
+				colors[3 * i + 1] = color.g;
+				colors[3 * i + 2] = color.b;
+
+				sizes[i] = 1;
+			}
+
+
+
+
+			geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+			geometry.addAttribute('ca', new THREE.BufferAttribute(colors, 3));
+			geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+			geometry.computeBoundingBox();
+
+
+			return geometry;
+		}
+
+		function generatePointcloud(data, filenames) {
+
+			var geometry = generatePointCloudGeometry(data, filenames);
+
+			// var material = new THREE.PointsMaterial({
+			// 	size: pointSize,
+			// 	vertexColors: THREE.VertexColors,
+			// 	sizeAttenuation: false
+			// });
+
+
+			var texture = new THREE.TextureLoader().load("textures/disc.png");
+			texture.wrapS = THREE.RepeatWrapping;
+			texture.wrapT = THREE.RepeatWrapping;
+			var material = new THREE.ShaderMaterial({
+				uniforms: {
+					color: { value: new THREE.Color(0xffffff) },
+					pointTexture: { value: texture }
+				},
+				vertexShader: document.getElementById('vertexshader').textContent,
+				fragmentShader: document.getElementById('fragmentshader').textContent,
+				transparent: true,
+				// depthWrite: true,
+				// depthTest: true,
+				// alphaTest: 0.5,
+				// flatShading: true
+			});
+
+			var pointcloud = new THREE.Points(geometry, material);
+			pointcloud.userData = data.map(d => d['coordinates']);
+			pointCloud = pointcloud;
+			return pointcloud;
+
+		}
+
+		var orbitControls;
+
+		function init() {
+
+			var container = document.getElementById('container');
+
+			scene = new THREE.Scene();
+
+			clock = new THREE.Clock();
+
+			const near_plane = 2;
+			const far_plane = 100;
+
+			// Set up camera and scene
+			camera = new THREE.PerspectiveCamera(
+				20,
+				renderWidth / renderHeight,
+				near_plane,
+				far_plane
+			);
+
+			camera.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, 40));
+
+			orbitControls = new THREE.OrbitControls(camera,container);
+			orbitControls.autoRotate = true;
+			orbitControls.autoRotateSpeed = 0.1;
+			orbitControls.scrreenSpacePanning = true;
+			// orbitControls.enableZoom=false;
+
+
+			let jsonData = getData("umap", "mfcc", 3, 3);
+			var pcBuffer = generatePointcloud(jsonData, filePaths);
+			pcBuffer.scale.set(10, 10, 10);
+			pcBuffer.position.set(0, 0, 0);
+			scene.add(pcBuffer);
+
+			pointclouds = [pcBuffer];
+
+			//
+
+
+			//
+			renderWidth = window.innerWidth - drawerWidth;
+			renderHeight = window.innerHeight - titleHeight;
+			renderer = new THREE.WebGLRenderer();
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setClearColor(0x000000, 1);
+			renderer.setSize(renderWidth, renderHeight);
+			container.appendChild(renderer.domElement);
+
+			//
+
+			raycaster = new THREE.Raycaster();
+			raycaster.params.Points.threshold = threshold;
+
+			//
+
+			stats = new Stats();
+			container.appendChild(stats.dom);
+
+			//
+
+			window.addEventListener('resize', onWindowResize, false);
+			document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+			var size = 10,
+				steps = 0.5;
+
+			geometry = new THREE.Geometry();
+			material = new THREE.LineBasicMaterial({
+				color: 0x222222
+			});
+
+			for (var i = -size; i <= size; i += steps) {
+				//draw lines one way
+				geometry.vertices.push(new THREE.Vector3(-size, i, -0.04));
+				geometry.vertices.push(new THREE.Vector3(size, i, -0.04));
+
+				//draw lines the other way
+				geometry.vertices.push(new THREE.Vector3(i, -size, -0.04));
+				geometry.vertices.push(new THREE.Vector3(i, size, -0.04));
+			}
+
+			//THREE.LinePieces prevents connecting of vertices
+			var line = new THREE.LineSegments(geometry, material, THREE.LinePieces);
+
+			scene.add(line);
+
+		}
+
+		function onDocumentMouseMove(event) {
+
+			mouseHasMoved = true;
+
+			titleHeight = document.getElementById("header").clientHeight;
+
+			if (window.innerWidth >= 1024) {
+				drawerWidth = document.getElementById("drawer").clientWidth;
+				mouse.x = ((event.clientX - drawerWidth) / renderWidth) * 2 - 1;
+			} else {
+				mouse.x = (event.clientX / renderWidth) * 2 - 1;
+			}
+			mouse.y = - ((event.clientY - titleHeight) / (renderHeight)) * 2 + 1;
+		}
+
+		function onWindowResize() {
+
+			renderWidth = window.innerWidth - drawerWidth;
+			renderHeight = window.innerHeight - titleHeight;
+
+			camera.aspect = renderWidth / renderHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize(renderWidth, renderHeight);
+
+		}
+
+
+		
+		function animate() {
+
+			requestAnimationFrame(animate);
+
+			if (interpolating) {
+				pointclouds[0].geometry.attributes.position.needsUpdate = true;
+
+				var positions = pointclouds[0].geometry.attributes.position.array;
+
+				interpolatingAmount += interpolationSpeed;
+
+				if (interpolatingAmount >= 1.0) {
+					interpolating = false;
+
+					for (var i = 0; i < positions.length; ++i) {
+						positions[i] = target[i];
+					}
+				} else {
+
+					for (var i = 0; i < positions.length; i += 3) {
+						positions[i] = THREE.Math.lerp(positions[i], target[i], interpolatingAmount);
+						positions[i + 1] = THREE.Math.lerp(positions[i + 1], target[i + 1], interpolatingAmount);
+						positions[i + 2] = THREE.Math.lerp(positions[i + 2], target[i + 2], interpolatingAmount);
+					}
+				}
+			}
+
+			if (playingSources.length > 0) {
+				pointclouds[0].geometry.attributes.size.needsUpdate = true;
+				
+				var sizes = pointclouds[0].geometry.attributes.size.array;
+
+				sizes.fill(1.0);
+
+				playingSources.forEach(({adjustPointSize}) => adjustPointSize(sizes));
+			}
+
+			if (activeTracksInMaestron.length > 0) {
+				pointclouds[0].geometry.attributes.size.needsUpdate = true;
+				
+				var sizes = pointclouds[0].geometry.attributes.size.array;
+
+				sizes.fill(1.0);
+				const time = new Date().getTime();
+				activeTracksInMaestron.forEach((path,i) => {
+					const indexOfPointRelatedToPath = filePaths.indexOf(path);
+					if (indexOfPointRelatedToPath >= 0)
+						sizes[indexOfPointRelatedToPath] = (Math.sin(time/200+i)+1)*1.5+4;
+
+				});
+			}
+
+
+
+
+			render();
+			stats.update();
+
+		}
+
+		var toggle = 0;
+
+
+
+		const checkVolume = (analyser) => {
+			let frequencyData = new Uint8Array(1);
+			analyser.getByteFrequencyData(frequencyData);
+			let volume = frequencyData.reduce((max, vol) => Math.max(max, Math.abs(vol)), 0);
+
+			return Math.max(1,2+ volume/25);
+		}
+
+
+		function render() {
+
+			// var speed = Date.now() * 0.00008;
+
+			// camera.position.x = Math.cos(speed) * 30;
+			// camera.position.z = Math.sin(speed) * 30;
+			// camera.lookAt(scene.position);
+
+			raycaster.setFromCamera(mouse, camera);
+
+			const intersections = raycaster.intersectObjects(pointclouds);
+			const intersection = (intersections.length) > 0 ? intersections[0] : null;
+
+			// if (intersection)
+			// 	console.log(intersection);
+
+			if (toggle > 0.02 && intersection !== null && mouseHasMoved) {
+
+				if (previousSampleIndex != intersection.index) {
+					let filepath = filePaths[intersection.index];
+					previousSampleIndex = intersection.index;
+					const splitPath = filepath.split("/");
+					let file = "audio/"+splitPath.map(encodeURIComponent).join("/");
+					WebAudiox.loadBuffer(context, file, (buffer) => {
+						// init AudioBufferSourceNode
+						playingSources.forEach(({ stop }) => stop());
+						// playingSources = [];
+						var source = context.createBufferSource();
+						source.buffer = buffer;
+						source.loop = true;
+						var fader = context.createGain();
+
+						fader.gain.value = 0;
+						source.connect(fader);
+						fader.connect(lineOut.destination);
+						fader.connect(lineOutAnalyser.destination)
+						fader.gain.linearRampToValueAtTime(1, context.currentTime + 0.5);
+						// start the sound now
+						source.start(0);
+
+
+
+				
+						const intersectionPointIndex = intersection.index;
+
+			
+
+						let analyser = context.createAnalyser();
+						fader.connect(analyser);
+						const playingSource = {
+							adjustPointSize: (points) =>{
+								points[intersectionPointIndex] = checkVolume(analyser);
+							},
+							stop: () => {
+								fader.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
+								setTimeout(() => {
+									source.stop();
+									var index = playingSources.indexOf(playingSource);
+										if (index > -1) {
+										playingSources.splice(index, 1);
+									}
+								}, 1000);
+							}
+						};
+
+						playingSources.push(playingSource);
+						// setInterval(adjustSphereSizeToMeter, 50);
+
+
+					});
+
+					document.getElementById("filename").innerHTML = filepath;
+				}
+
+
+				toggle = 0;
+
+			}
+
+
+
+			toggle += clock.getDelta();
+			sortPoints();
+			orbitControls.update();
+			renderer.render(scene, camera);
+
+		}
+
+	</script>
+
+</body>
+
+</html>
