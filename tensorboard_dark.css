@@ -1,5 +1,4 @@
-@-moz-document regexp("http://[\\w\\.]+:60[\\w]{2}/.*")
-{
+
   .tf-tensorboard-0
   {
     background: #21262b !important;
@@ -123,4 +122,4 @@ h3.tf-option-selector,
   {
     background: #41464b !important;
   }
-}
+
